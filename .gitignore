@@ -1,0 +1,6 @@
+/target
+**/*.rs.bk
+.DS_Store
+/dist
+assets/icon/AppIcon.iconset/
+assets/icon/AppIconDev.iconset/

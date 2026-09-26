@@ -1,0 +1,50 @@
+[package]
+name = "gravitynote-gpui"
+version = "1.0.0"
+edition = "2021"
+description = "GravityNote — one markdown file, every note, one keystroke away"
+license = "MIT"
+publish = false
+repository = "https://github.com/1234igor/gravitynote"
+
+# Split so the document layer is testable and benchmarkable without a window.
+[lib]
+name = "gravitynote"
+path = "src/lib.rs"
+
+[[bin]]
+name = "gravitynote-gpui"
+path = "src/main.rs"
+
+[dependencies]
+# Exact live Liquid Glass renderer fork from ../gpui-liquid-glass. The complete
+# fork is vendored so this repository remains independently buildable.
+gpui = { path = "vendor/gpui", features = ["runtime_shaders"] }
+unicode-segmentation = "1.12"
+# Decoding and downscaling stored images (src/images.rs, src/image_bank.rs).
+# gpui already builds both of these, so neither adds a compile unit — and the
+# `image` version must stay the one gpui uses, since `RenderImage::new` takes
+# its `Frame` type.
+image = "0.25"
+sha2 = "0.10"
+# `Shared<Task<_>>`, so two rows asking for the same image in one frame share
+# one decode. gpui builds this already and uses it for exactly this purpose.
+futures = "0.3"
+chrono = { version = "0.4", default-features = false, features = ["std", "clock"] }
+# SIMD byte scanning for the first character of a search (src/find.rs). Already
+# in the tree — gpui builds it — so this adds nothing to the build.
+memchr = "2.8"
+# Pattern search in the find bar (src/find.rs). Already in the tree — gpui
+# builds it — so this adds nothing to the build.
+regex = "1.11"
+
+# Owned by src/platform.rs — macOS menu-bar item + global hotkey.
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", features = ["NSData", "NSString", "NSPathUtilities", "NSUserDefaults", "NSURL", "NSError", "NSArray"] }
+objc2-app-kit = { version = "0.3", features = ["NSAnimationContext", "NSAlert", "NSApplication", "NSButton", "NSCell", "NSControl", "NSEvent", "NSImage", "NSMenu", "NSMenuItem", "NSResponder", "NSStatusBar", "NSStatusBarButton", "NSStatusItem", "NSView", "NSWindow", "objc2-core-foundation"] }
+objc2-service-management = { version = "0.3.2", default-features = false, features = ["std", "objc2", "objc2-foundation", "SMAppService"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
