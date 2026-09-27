@@ -1,28 +1,37 @@
-# Contributing
+# Contributing to GravityNote
 
-This is a small personal project, kept public because it is more useful that
-way. Issues and pull requests are welcome; slow replies are likely.
+Bug reports, documentation corrections, and pull requests are welcome. Include
+steps to reproduce a bug, the expected result, and your macOS version. Remove
+private notes, maps, and images from reports.
 
-## Before opening a pull request
+Discuss new dependencies, public API changes, and major features in an issue
+before starting work.
+
+## Development build
+
+On macOS, with the [build requirements](README.md#build-and-run) installed:
 
 ```sh
+./dev.sh
+```
+
+This builds and launches a development app with a DEV icon. Its default data
+folder is `~/Library/Application Support/gravitynote-gpui-dev/`. Use sample documents
+when testing file opening or changing the storage folder.
+
+## Before submitting
+
+For code changes, run the same build and tests as CI:
+
+```sh
+cargo build --release
 cargo test --release
 ```
 
-## What gets merged easily
+For documentation-only changes, check links and verify commands and feature
+claims against the source. For UI changes, also check the affected behavior in
+the development app; automated tests do not verify its appearance.
 
-- A bug with a reproduction, and the smallest change that fixes it.
-- A fix to something the docs get wrong. The docs are meant to be accurate
-  about what is measured and what is merely believed, so a correction there is
-  as valuable as a code change.
-
-## What to raise first
-
-Anything that changes the shape of the public API, adds a dependency, or
-enlarges the scope. Open an issue before writing the code — it is no fun to
-write a patch that gets turned down on direction.
-
-## Style
-
-Match the code around your change: same naming, same comment density. Comments
-here explain why a thing is the way it is, not what the line does.
+Keep changes focused and follow the surrounding code style. In the pull request,
+explain the problem, the change, and what you checked. Include before-and-after
+screenshots for visible changes.
