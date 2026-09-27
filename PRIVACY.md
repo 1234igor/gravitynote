@@ -1,6 +1,6 @@
 # GravityNote privacy policy
 
-GravityNote stores your documents and preferences locally on your Mac. The app does not collect or transmit your notes, maps, images, usage data, or personal information to the developer. It includes no analytics, advertising, accounts, subscriptions, or in-app purchases.
+GravityNote stores your documents and preferences locally on your Mac. The app does not collect or transmit your notes, images, usage data, or personal information to the developer. It includes no analytics, advertising, accounts, subscriptions, or in-app purchases.
 
 Files and folders you choose through macOS file dialogs are accessed only to provide the document features you request. If you place a document in a folder managed by a cloud storage provider, that provider handles synchronization under its own privacy policy.
 

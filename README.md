@@ -4,8 +4,6 @@ A macOS notes app built in Rust with [GPUI](https://gpui.rs). Keep your notes in
 one Markdown file. Add new entries at the top and bring older entries back when
 you need them.
 
-![GravityNote editor](docs/screenshot.png)
-
 ## Features
 
 - Markdown highlighting, soft wrapping, lists, and checkboxes.
@@ -63,7 +61,7 @@ registered it, use the menu-bar icon to open GravityNote.
 
 ## Files and backups
 
-The default data directory is:
+Builds made with `run.sh` use this default data directory:
 
 ```text
 ~/Library/Application Support/gravitynote-gpui/
@@ -72,6 +70,8 @@ The default data directory is:
 ├── images/
 └── backups/note-YYYY-MM-DD_HH-MM-SS.md
 ```
+
+Sandboxed builds store this directory inside the app container.
 
 Your notes save automatically as you type.
 

@@ -2,7 +2,7 @@
 
 Bug reports, documentation corrections, and pull requests are welcome. Include
 steps to reproduce a bug, the expected result, and your macOS version. Remove
-private notes, maps, and images from reports.
+private notes and images from reports.
 
 Discuss new dependencies, public API changes, and major features in an issue
 before starting work.

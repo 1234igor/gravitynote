@@ -23,6 +23,11 @@ and use the SIL Open Font License 1.1.
 - [Upstream project](https://github.com/mishamyrt/Lilex)
 - [License and copyright notices](assets/fonts/OFL.txt)
 
+## Images
+
+See [image licenses](IMAGE-LICENSES.md) for application artwork, screenshots,
+and the assets in the vendored GPUI examples.
+
 ## Other dependencies
 
 Direct dependencies are listed in `Cargo.toml`; `Cargo.lock` records the resolved
