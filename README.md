@@ -10,7 +10,7 @@ you need them.
 - Inline images: paste or drop an image, then drag its corner to resize it.
 - Find and replace, undo and redo, and a searchable command palette.
 - A global show/hide shortcut and a menu-bar icon.
-- Light, dark, and system appearance; adjustable text size and glass background.
+- Light, dark, and system appearance; adjustable text size.
 - Autosave, automatic backups, and a backup browser for restoring earlier notes.
 - Choose where to store your notes, including a folder managed by a sync service.
 
@@ -94,7 +94,7 @@ See the [privacy policy](PRIVACY.md) for data handling.
 
 ## Development
 
-[Contributing](CONTRIBUTING.md) · [Roadmap](ROADMAP.md) · [GPUI changes](vendor/gpui/MODIFICATIONS.md).
+[Contributing](CONTRIBUTING.md) · [Roadmap](ROADMAP.md).
 
 ## License
 

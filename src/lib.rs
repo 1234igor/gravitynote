@@ -20,7 +20,7 @@
 //! | [`images`] | The content-addressed image store, and how a note refers to it |
 //! | [`image_bank`] | Decoded images, downscaled and bounded |
 //! | [`persist`] | Atomic autosave and hourly rolling backups |
-//! | [`settings`] | Persisted text, appearance, glass, shortcut, and window preferences |
+//! | [`settings`] | Persisted text, appearance, shortcut, and window preferences |
 //! | [`corpus`] | Deterministic note generator used by the performance tests |
 //! | [`theme`] | Palette and the markdown-style → text-attribute mapping |
 //! | [`platform`] | macOS menu-bar item and the global show/hide hotkey |

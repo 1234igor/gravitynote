@@ -17,9 +17,7 @@ name = "gravitynote-gpui"
 path = "src/main.rs"
 
 [dependencies]
-# Exact live Liquid Glass renderer fork from ../gpui-liquid-glass. The complete
-# fork is vendored so this repository remains independently buildable.
-gpui = { path = "vendor/gpui", features = ["runtime_shaders"] }
+gpui = { version = "=0.2.2", features = ["runtime_shaders"] }
 unicode-segmentation = "1.12"
 # Decoding and downscaling stored images (src/images.rs, src/image_bank.rs).
 # gpui already builds both of these, so neither adds a compile unit — and the

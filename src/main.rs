@@ -45,7 +45,7 @@ use gpui::{
     MouseExitEvent, MouseMoveEvent, MouseUpEvent, OsAction,
     Pixels, Point, ScrollWheelEvent, SharedString, StrikethroughStyle, Style, StyledText, svg, TextLayout, TextRun,
     TitlebarOptions, UTF16Selection, UnderlineStyle, Window, WindowBackgroundAppearance,
-    WindowBounds, WindowGlassAppearance, WindowOptions,
+    WindowBounds, WindowOptions,
 };
 
 use gravitynote::caret;
@@ -630,50 +630,6 @@ struct ScrollMetrics {
     /// The first-visible line index when the last line sits at the bottom — the
     /// denominator that maps a track fraction onto a scroll position.
     max_top_line: f32,
-}
-
-/// Maps the Settings matrix to the reference's native full-window material.
-/// The NSWindow owns the outside silhouette, so the inner glass radius remains
-/// zero exactly as prescribed by `gpui-liquid-glass`.
-const fn window_background_for_glass(
-    style: settings::GlassStyle,
-) -> WindowBackgroundAppearance {
-    let coral = gpui::Rgba {
-        r: 1.0,
-        g: 0.22,
-        b: 0.28,
-        a: 1.0,
-    };
-    match style {
-        settings::GlassStyle::Regular => WindowBackgroundAppearance::LiquidGlass(
-            WindowGlassAppearance::regular().corner_radius(px(0.0)),
-        ),
-        settings::GlassStyle::Clear => WindowBackgroundAppearance::LiquidGlass(
-            WindowGlassAppearance::clear().corner_radius(px(0.0)),
-        ),
-        settings::GlassStyle::RegularTinted => WindowBackgroundAppearance::LiquidGlass(
-            WindowGlassAppearance::regular()
-                .tint(coral)
-                .corner_radius(px(0.0)),
-        ),
-        settings::GlassStyle::ClearTinted => WindowBackgroundAppearance::LiquidGlass(
-            WindowGlassAppearance::clear()
-                .tint(coral)
-                .corner_radius(px(0.0)),
-        ),
-        settings::GlassStyle::Identity => WindowBackgroundAppearance::Transparent,
-    }
-}
-
-/// Code is an ordinary local contrast surface above the window material. Keep
-/// the original opaque palette in Identity mode; over glass, preserve enough of
-/// the compositor image to avoid cutting a flat paper rectangle out of it.
-fn code_surface(hex: u32, glass: bool, alpha: f32) -> Hsla {
-    let mut colour = rgb(hex);
-    if glass {
-        colour.a = alpha;
-    }
-    colour.into()
 }
 
 struct NoteApp {
@@ -1608,11 +1564,9 @@ impl NoteApp {
         }
     }
 
-    fn restore_settings_defaults(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+    fn restore_settings_defaults(&mut self, _window: &mut Window, cx: &mut Context<Self>) {
         self.settings.reset_text_size();
         self.settings.appearance = settings::Appearance::default();
-        self.settings.glass = settings::GlassStyle::default();
-        window.set_background_appearance(window_background_for_glass(self.settings.glass));
         self.apply_text_size(cx);
         self.set_toggle_shortcut(settings::default_toggle_shortcut(), cx);
         self.notice = Some(Notice::remark("Settings restored to defaults."));
@@ -5240,21 +5194,6 @@ impl NoteApp {
             }))
             .into_any_element();
 
-        // The material names and order mirror the complete matrix in the
-        // sibling GPUI Liquid Glass reference, including its no-effect Identity
-        // sentinel.
-        let glass_control = chip(self.settings.glass.label().into(), false)
-            .id("settings-glass")
-            .on_click(cx.listener(|this, _e: &ClickEvent, window, cx| {
-                this.settings.glass = this.settings.glass.next();
-                window.set_background_appearance(window_background_for_glass(this.settings.glass));
-                if let Err(err) = this.settings.save(&settings::settings_path()) {
-                    eprintln!("gravitynote: could not save settings: {err}");
-                }
-                cx.notify();
-            }))
-            .into_any_element();
-
         let shortcut_controls = div()
             .flex()
             .flex_row()
@@ -5392,7 +5331,6 @@ impl NoteApp {
                     .child(div().h(px(1.)).w_full().bg(rgb(theme().rule)))
                     .child(row("Text size", text_size_controls))
                     .child(row("Appearance", appearance_control))
-                    .child(row("Glass", glass_control))
                     .child(row("Show / Hide shortcut", shortcut_controls))
                     .child(row("Open at login", login_toggle))
                     .child(
@@ -6918,16 +6856,13 @@ impl NoteApp {
         // Inline-code chips are painted behind the text, tight to the glyph
         // band, rather than as full-height run backgrounds (see CodeUnderlay).
         // Their line-local ranges come from the same spans the runs do.
-        let glass = self.settings.glass != settings::GlassStyle::Identity;
-        let code_chip_alpha = if theme::is_dark() { 0.62 } else { 0.68 };
-        let code_block_alpha = if theme::is_dark() { 0.46 } else { 0.52 };
         let chips: Vec<(Range<usize>, Hsla)> = spans
             .iter()
             .filter(|s| s.end <= display.len())
             .filter_map(|s| match s.style {
                 MdStyle::Code => Some((
                     s.start..s.end,
-                    code_surface(theme().code_bg, glass, code_chip_alpha),
+                    rgb(theme().code_bg).into(),
                 )),
                 MdStyle::Highlight => Some((s.start..s.end, rgb(theme().highlight_bg).into())),
                 _ => None,
@@ -6977,13 +6912,7 @@ impl NoteApp {
             .w_full()
             .px(row_bleed(base))
             .when(quote_indent > 0., |d| d.pl(px(quote_indent) + row_bleed(base)))
-            .when(in_code_block, |d| {
-                d.bg(code_surface(
-                    theme().codeblock_bg,
-                    glass,
-                    code_block_alpha,
-                ))
-            })
+            .when(in_code_block, |d| d.bg(rgb(theme().codeblock_bg)))
             .when_some(heading, |d, level| {
                 let (size, space_above) = heading_scale(level);
                 // Only pad a heading that follows text. The first line needs no
@@ -7677,11 +7606,7 @@ impl Render for NoteApp {
             .flex()
             .flex_col()
             .size_full()
-            // The reference material is the window background. Identity is
-            // the sole no-effect mode, so it keeps the ordinary paper fill.
-            .when(self.settings.glass == settings::GlassStyle::Identity, |d| {
-                d.bg(rgb(theme().bg))
-            })
+            .bg(rgb(theme().bg))
             .text_color(rgb(theme().fg))
             .font_family("Lilex")
             .text_size(px(self.settings.text_size))
@@ -8971,7 +8896,6 @@ fn main() {
         // user turned it off) is what the global hotkey registers; the saved
         // frame is where the window reopens.
         let startup = Settings::load(&settings::settings_path());
-        let window_background = window_background_for_glass(startup.glass);
         // The development build never claims the global chord. Only one process
         // can hold it, so whichever launched last would silently take ⌃A away
         // from the copy holding the real notes — and give it to the copy being
@@ -9012,9 +8936,7 @@ fn main() {
                     // buttons and one row of text: below that there is nothing
                     // left to shrink.
                     window_min_size: Some(size(px(180.), px(120.))),
-                    // Native compositor material from the reference. The root
-                    // stays transparent except for Identity's solid paper fill.
-                    window_background,
+                    window_background: WindowBackgroundAppearance::Opaque,
                     focus: true,
                     show: true,
                     ..Default::default()

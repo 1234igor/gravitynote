@@ -1,6 +1,6 @@
 //! Persisted preferences.
 //!
-//! Text size, appearance, glass material, and the global chord that shows or
+//! Text size, appearance, and the global chord that shows or
 //! hides the window live in a one-line-per-key file next to the note.
 //!
 //! Reading never fails: a missing, unreadable, or malformed file yields the
@@ -272,70 +272,11 @@ impl Appearance {
     }
 }
 
-/// The live window material.
-///
-/// These mirror the complete material matrix in the sibling
-/// `gpui-liquid-glass` reference: Apple's two glass variants, each with an
-/// optional tint, plus Identity as the no-effect sentinel.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub enum GlassStyle {
-    #[default]
-    Regular,
-    Clear,
-    RegularTinted,
-    ClearTinted,
-    Identity,
-}
-
-impl GlassStyle {
-    pub fn id(self) -> &'static str {
-        match self {
-            Self::Regular => "regular",
-            Self::Clear => "clear",
-            Self::RegularTinted => "regular-tinted",
-            Self::ClearTinted => "clear-tinted",
-            Self::Identity => "identity",
-        }
-    }
-
-    pub fn from_id(id: &str) -> Self {
-        match id.trim().to_ascii_lowercase().as_str() {
-            "clear" => Self::Clear,
-            "regular-tinted" => Self::RegularTinted,
-            "clear-tinted" => Self::ClearTinted,
-            "identity" | "solid" | "off" => Self::Identity,
-            _ => Self::Regular,
-        }
-    }
-
-    pub fn label(self) -> &'static str {
-        match self {
-            Self::Regular => "Regular",
-            Self::Clear => "Clear",
-            Self::RegularTinted => "Regular Tinted",
-            Self::ClearTinted => "Clear Tinted",
-            Self::Identity => "Identity",
-        }
-    }
-
-    pub fn next(self) -> Self {
-        match self {
-            Self::Regular => Self::Clear,
-            Self::Clear => Self::RegularTinted,
-            Self::RegularTinted => Self::ClearTinted,
-            Self::ClearTinted => Self::Identity,
-            Self::Identity => Self::Regular,
-        }
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Settings {
     pub text_size: f32,
     /// Light, dark, or whatever the Mac is set to.
     pub appearance: Appearance,
-    /// Regular or Clear liquid glass, optionally tinted; Identity is no effect.
-    pub glass: GlassStyle,
     /// Where `note.md` lives, when it is not in Application Support. The whole
     /// of "sync": the note is plain markdown in a normal directory, and putting
     /// that directory in iCloud Drive or Dropbox is the user's own choice of
@@ -359,7 +300,6 @@ impl Default for Settings {
         Self {
             text_size: DEFAULT_TEXT_SIZE,
             appearance: Appearance::System,
-            glass: GlassStyle::Regular,
             note_folder: None,
             toggle_shortcut: default_toggle_shortcut(),
             window: None,
@@ -398,9 +338,6 @@ impl Settings {
                 }
                 "appearance" => {
                     settings.appearance = Appearance::from_id(value);
-                }
-                "glass" => {
-                    settings.glass = GlassStyle::from_id(value);
                 }
                 "text_size" => {
                     if let Ok(size) = value.parse::<f32>() {
@@ -448,10 +385,9 @@ impl Settings {
             None => "off".to_string(),
         };
         let mut out = format!(
-            "text_size = {}\ntoggle_shortcut = {shortcut}\nappearance = {}\nglass = {}\n",
+            "text_size = {}\ntoggle_shortcut = {shortcut}\nappearance = {}\n",
             self.text_size,
             self.appearance.id(),
-            self.glass.id(),
         );
         if let Some(folder) = &self.note_folder {
             out.push_str(&format!("note_folder = {}\n", folder.display()));
@@ -543,37 +479,28 @@ mod tests {
         let mut settings = Settings::default();
         settings.bigger();
         settings.bigger();
-        settings.glass = GlassStyle::ClearTinted;
         settings.save(&path).unwrap();
         let loaded = Settings::load(&path);
         assert_eq!(loaded.text_size, settings.text_size);
-        assert_eq!(loaded.glass, GlassStyle::ClearTinted);
         let _ = std::fs::remove_file(&path);
     }
 
     #[test]
-    fn glass_styles_have_stable_ids_and_cycle() {
-        let styles = [
-            GlassStyle::Regular,
-            GlassStyle::Clear,
-            GlassStyle::RegularTinted,
-            GlassStyle::ClearTinted,
-            GlassStyle::Identity,
-        ];
-        for style in styles {
-            assert_eq!(GlassStyle::from_id(style.id()), style);
-        }
-        let mut style = GlassStyle::Regular;
-        for expected in [
-            GlassStyle::Clear,
-            GlassStyle::RegularTinted,
-            GlassStyle::ClearTinted,
-            GlassStyle::Identity,
-            GlassStyle::Regular,
-        ] {
-            style = style.next();
-            assert_eq!(style, expected);
-        }
+    fn old_glass_setting_does_not_change_other_preferences() {
+        let path = scratch("legacy-glass");
+        std::fs::write(
+            &path,
+            "text_size = 20\nappearance = dark\nglass = clear-tinted\ncaret = 42\n",
+        )
+        .unwrap();
+        let settings = Settings::load(&path);
+        assert_eq!(settings.text_size, 20.0);
+        assert_eq!(settings.appearance, Appearance::Dark);
+        assert_eq!(settings.caret, 42);
+        settings.save(&path).unwrap();
+        assert!(!std::fs::read_to_string(&path).unwrap().contains("glass"));
+        assert_eq!(Settings::load(&path), settings);
+        let _ = std::fs::remove_file(path);
     }
 
     #[test]

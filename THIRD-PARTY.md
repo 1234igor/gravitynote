@@ -5,15 +5,11 @@ their own licenses.
 
 ## GPUI
 
-`vendor/gpui/` contains a modified copy of GPUI 0.2.2 by Zed Industries,
-licensed under Apache-2.0.
+The app uses the unmodified GPUI 0.2.2 crate by Zed Industries, licensed under
+Apache-2.0. Cargo downloads it from crates.io.
 
 - [Upstream package](https://crates.io/crates/gpui/0.2.2)
-- [License](vendor/gpui/LICENSE-APACHE)
-- [Modifications](vendor/gpui/MODIFICATIONS.md)
-
-The fork adds Liquid Glass rendering and window integration. Its source is
-included in this repository so builds do not require a sibling checkout.
+- [License](licenses/GPUI-APACHE-2.0.txt)
 
 ## Lilex fonts
 
@@ -25,8 +21,7 @@ and use the SIL Open Font License 1.1.
 
 ## Images
 
-See [image licenses](IMAGE-LICENSES.md) for application artwork, screenshots,
-and the assets in the vendored GPUI examples.
+See [image licenses](IMAGE-LICENSES.md) for application artwork and screenshots.
 
 ## Other dependencies
 
