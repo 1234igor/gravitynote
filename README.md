@@ -61,19 +61,13 @@ registered it, use the menu-bar icon to open GravityNote.
 
 ## Files and backups
 
-Builds made with `run.sh` use this default data directory:
+On first launch, choose a folder for your notes. Your notes save automatically
+as `note.md` in that folder, with `images/` and `backups/` alongside it.
+Preferences and bookmarks remain in Application Support.
 
-```text
-~/Library/Application Support/gravitynote-gpui/
-├── note.md
-├── settings.txt
-├── images/
-└── backups/note-YYYY-MM-DD_HH-MM-SS.md
-```
-
-Sandboxed builds store this directory inside the app container.
-
-Your notes save automatically as you type.
+Older notes, images and backups in Application Support are copied into the
+chosen folder. Originals are preserved, and different existing files are never
+overwritten. Canceling the folder picker exits without changing your files.
 
 Changed notes are backed up hourly. Older backups are kept as daily and monthly
 copies for up to two years. Open **Restore from Backup** in the command palette

@@ -47,3 +47,5 @@ pub mod settings;
 pub mod theme;
 
 pub mod sandbox;
+
+pub mod document_location;

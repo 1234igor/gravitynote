@@ -58,7 +58,7 @@ use gravitynote::index::{self, LineIndex};
 use gravitynote::lists;
 use gravitynote::markdown::{self, MdStyle};
 use gravitynote::note::{
-    self, default_note_path, load_note, LoadOutcome, Note,
+    self, load_note, LoadOutcome, Note,
 };
 use gravitynote::fences::FenceMap;
 use gravitynote::find::Find;
@@ -898,7 +898,7 @@ impl NoteApp {
             .cloned();
         let path = match &settings.note_folder {
             Some(folder) => folder.join("note.md"),
-            None => default_note_path(),
+            None => unreachable!("Choose a note folder before constructing the editor"),
         };
         let images_dir = path
             .parent()
@@ -8689,6 +8689,8 @@ fn main() {
     println!("gravitynote: starting (Rust + GPUI markdown note window)");
 
     Application::new().with_assets(Icons).run(|cx: &mut App| {
+        cx.activate(true);
+        if !gravitynote::document_location::ensure() { cx.quit(); return; }
         // Register embedded Lilex — all faces, so bold/italic markdown resolves.
         if let Err(err) = cx.text_system().add_fonts(vec![
             Cow::Borrowed(LILEX_REGULAR),
