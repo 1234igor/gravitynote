@@ -4,6 +4,12 @@ A macOS notes app built in Rust with [GPUI](https://gpui.rs). Keep your notes in
 one Markdown file. Add new entries at the top and bring older entries back when
 you need them.
 
+<p>
+  <a href="https://apps.apple.com/app/id6814392510">
+    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download GravityNote on the App Store" height="48">
+  </a>
+</p>
+
 ## Features
 
 - Markdown highlighting, soft wrapping, lists, and checkboxes.
